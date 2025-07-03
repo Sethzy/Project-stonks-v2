@@ -46,6 +46,13 @@ export default function ProtectedRoute({
     }
   }, [user, isLoading, pathname, router, hasRedirected]);
 
+  useEffect(() => {
+    // Redirect authenticated users from public pages to the library
+    if (user && !isLoading && PUBLIC_ROUTES.includes(pathname)) {
+      router.replace("/library");
+    }
+  }, [user, isLoading, pathname, router]);
+
   // Show loading state only if actually loading
   if (isLoading) {
     return (
