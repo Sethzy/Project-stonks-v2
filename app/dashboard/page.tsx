@@ -1,26 +1,25 @@
 "use client";
 
 // import { useWebSocket } from '@/contexts/WebSocketContext';
-import { useEffect, useState } from 'react';
-import { supabase } from '@/utils/supabase';
-import { useAuth } from '@/contexts/AuthContext';
+import { useEffect, useState } from "react";
+import { supabase } from "@/utils/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 
-
-import { useRouter } from 'next/navigation';
-import { useSubscription } from '@/hooks/useSubscription';
+import { useRouter } from "next/navigation";
+import { useSubscription } from "@/hooks/useSubscription";
 // import { OnboardingTour } from '@/components/OnboardingTour';
-import { useTrialStatus } from '@/hooks/useTrialStatus';
-import { motion } from 'framer-motion';
-import { 
-  BarChart3, 
-  Users, 
-  CreditCard, 
+import { useTrialStatus } from "@/hooks/useTrialStatus";
+import { motion } from "framer-motion";
+import {
+  BarChart3,
+  Users,
+  CreditCard,
   Settings,
   PlusCircle,
   Clock,
   TrendingUp,
-  Activity
-} from 'lucide-react';
+  Activity,
+} from "lucide-react";
 
 const AUTH_TIMEOUT = 15000; // 15 seconds
 
@@ -31,29 +30,29 @@ const dashboardMetrics = [
     value: "1,234",
     change: "+12.3%",
     icon: <Users className="h-6 w-6 text-primary" />,
-    trend: "up"
+    trend: "up",
   },
   {
     title: "Revenue",
     value: "$12.4k",
     change: "+8.2%",
     icon: <CreditCard className="h-6 w-6 text-primary" />,
-    trend: "up"
+    trend: "up",
   },
   {
     title: "Active Sessions",
     value: "432",
     change: "-3.1%",
     icon: <Activity className="h-6 w-6 text-primary" />,
-    trend: "down"
+    trend: "down",
   },
   {
     title: "Growth Rate",
     value: "18.2%",
     change: "+2.4%",
     icon: <TrendingUp className="h-6 w-6 text-primary" />,
-    trend: "up"
-  }
+    trend: "up",
+  },
 ];
 
 // Recent activity data
@@ -62,36 +61,38 @@ const recentActivity = [
     id: 1,
     action: "New user signup",
     timestamp: "2 minutes ago",
-    icon: <PlusCircle className="h-4 w-4" />
+    icon: <PlusCircle className="h-4 w-4" />,
   },
   {
     id: 2,
     action: "Payment processed",
     timestamp: "15 minutes ago",
-    icon: <CreditCard className="h-4 w-4" />
+    icon: <CreditCard className="h-4 w-4" />,
   },
   {
     id: 3,
     action: "Settings updated",
     timestamp: "1 hour ago",
-    icon: <Settings className="h-4 w-4" />
+    icon: <Settings className="h-4 w-4" />,
   },
   {
     id: 4,
     action: "Session completed",
     timestamp: "2 hours ago",
-    icon: <Clock className="h-4 w-4" />
-  }
+    icon: <Clock className="h-4 w-4" />,
+  },
 ];
 
 export default function Dashboard() {
-
-  
   // const { isConnected } = useWebSocket();
   // const [fullResponse, setFullResponse] = useState('');
   const { user, isSubscriber, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
-  const { subscription, isLoading: isSubLoading, fetchSubscription } = useSubscription();
+  const {
+    subscription,
+    isLoading: isSubLoading,
+    fetchSubscription,
+  } = useSubscription();
   const [hasCheckedSubscription, setHasCheckedSubscription] = useState(false);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const { isInTrial, isLoading: isTrialLoading } = useTrialStatus();
@@ -106,20 +107,25 @@ export default function Dashboard() {
   // First check - Subscription and trial check
   useEffect(() => {
     if (isSubLoading || isTrialLoading) return;
-    
-    const hasValidSubscription = ['active', 'trialing'].includes(subscription?.status || '');
-    
-    console.log('Access check isInTrial:', {
+
+    const hasValidSubscription = ["active", "trialing"].includes(
+      subscription?.status || ""
+    );
+
+    console.log("Access check isInTrial:", {
       hasSubscription: !!subscription,
       status: subscription?.status,
       isInTrial: isInTrial,
-      validUntil: subscription?.current_period_end
+      validUntil: subscription?.current_period_end,
     });
 
     // Only redirect if there's no valid subscription AND no valid trial
     if (!hasValidSubscription && !isInTrial) {
-      console.log('No valid subscription or trial, redirecting');
-      router.replace('/profile');
+      console.log("No valid subscription or trial, redirecting to profile");
+      // Use a small delay to prevent race conditions
+      setTimeout(() => {
+        router.replace("/profile");
+      }, 100);
     }
   }, [subscription, isSubLoading, isTrialLoading, router, isInTrial]);
 
@@ -127,7 +133,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (isAuthLoading || isTrialLoading) return;
 
-    console.log('Access check:', {
+    console.log("Access check:", {
       isSubscriber,
       hasCheckedSubscription,
       isInTrial: isInTrial,
@@ -136,14 +142,26 @@ export default function Dashboard() {
 
     if (!hasCheckedSubscription) {
       setHasCheckedSubscription(true);
-      
+
       // Allow access for both subscribers and trial users
       if (!user || (!isSubscriber && !isInTrial && !isAuthLoading)) {
-        console.log('No valid subscription or trial, redirecting');
-        router.replace('/profile');
+        console.log("No valid subscription or trial, redirecting to profile");
+        // Use a small delay to prevent race conditions
+        setTimeout(() => {
+          router.replace("/profile");
+        }, 100);
       }
     }
-  }, [isSubscriber, isAuthLoading, hasCheckedSubscription, router, user, subscription, isTrialLoading, isInTrial]);
+  }, [
+    isSubscriber,
+    isAuthLoading,
+    hasCheckedSubscription,
+    router,
+    user,
+    subscription,
+    isTrialLoading,
+    isInTrial,
+  ]);
 
   // Add refresh effect
   useEffect(() => {
@@ -151,7 +169,7 @@ export default function Dashboard() {
       await fetchSubscription();
       setHasCheckedSubscription(true);
     };
-    
+
     if (user?.id) {
       refreshSubscription();
     }
@@ -162,15 +180,15 @@ export default function Dashboard() {
       // Check if user has completed onboarding
       const checkOnboarding = async () => {
         const { data } = await supabase
-          .from('user_preferences')
-          .select('has_completed_onboarding')
-          .eq('user_id', user.id)
+          .from("user_preferences")
+          .select("has_completed_onboarding")
+          .eq("user_id", user.id)
           .single();
-        
+
         setHasCompletedOnboarding(!!data?.has_completed_onboarding);
-        console.log('hasCompletedOnboarding: ', hasCompletedOnboarding)
+        console.log("hasCompletedOnboarding: ", hasCompletedOnboarding);
       };
-      
+
       checkOnboarding();
     }
   }, [user?.id, hasCompletedOnboarding]);
@@ -181,7 +199,7 @@ export default function Dashboard() {
         setAuthTimeout(true);
       }
     }, AUTH_TIMEOUT);
-    
+
     return () => clearTimeout(timer);
   }, [user, isAuthLoading, isTrialLoading]);
 
@@ -193,23 +211,22 @@ export default function Dashboard() {
 
   // Update the loading check
   if (!user && (isAuthLoading || isTrialLoading) && !hasCheckedSubscription) {
-    console.log('user: ', user)
-    console.log('isAuthLoading: ', isAuthLoading)
-    console.log('hasCheckedSubscription: ', hasCheckedSubscription)
+    console.log("user: ", user);
+    console.log("isAuthLoading: ", isAuthLoading);
+    console.log("hasCheckedSubscription: ", hasCheckedSubscription);
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground mb-4 mx-auto"></div>
           <p className="text-foreground">
-            {authTimeout ? 
-              "Taking longer than usual? Try refreshing the page 😊." :
-              "Verifying access..."}
+            {authTimeout
+              ? "Taking longer than usual? Try refreshing the page 😊."
+              : "Verifying access..."}
           </p>
         </div>
       </div>
     );
   }
-
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0B1120]">
@@ -245,9 +262,11 @@ export default function Dashboard() {
                 <div className="p-2 bg-primary/10 dark:bg-primary-light/10 rounded-lg">
                   {metric.icon}
                 </div>
-                <span className={`text-sm font-medium ${
-                  metric.trend === 'up' ? 'text-green-500' : 'text-red-500'
-                }`}>
+                <span
+                  className={`text-sm font-medium ${
+                    metric.trend === "up" ? "text-green-500" : "text-red-500"
+                  }`}
+                >
                   {metric.change}
                 </span>
               </div>
