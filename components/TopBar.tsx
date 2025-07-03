@@ -42,8 +42,8 @@ export default function TopBar() {
       setIsLoggingOut(true);
       await signOut();
       setIsDropdownOpen(false);
-      // Full page reload to clear all state
-      window.location.href = "/login";
+      // Use the router for a smooth client-side transition to the landing page.
+      router.push("/");
     } catch (error) {
       console.error("Logout failed:", error);
       alert("Failed to sign out. Please try again.");
