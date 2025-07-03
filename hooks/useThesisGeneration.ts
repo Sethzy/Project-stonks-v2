@@ -8,6 +8,7 @@
  */
 
 import { useCallback } from 'react';
+import { toast } from 'sonner';
 import { type ResearchReport } from '@/types/thesis';
 import { generateMockAnalysis } from '@/lib/mock-analysis-engine';
 
@@ -58,11 +59,19 @@ export function useThesisGeneration({
       // 2. Add the pending report to the central state via the `addReport` function.
       addReport(pendingReport);
 
+      // Add a toast notification to inform the user that the analysis has started.
+      toast.info(`Analysis started for ${pendingReport.ticker}.`, {
+        description: 'You will be notified when it is complete.',
+      });
+
       // 3. Invoke the mock analysis engine.
       // The engine will simulate a delay and then call the `onComplete` callback.
       generateMockAnalysis(pendingReport, (completedReport) => {
         // 4. Once the analysis is complete, update the report in the central state.
         updateReport(completedReport);
+        toast.success(`Analysis complete for ${completedReport.ticker}.`, {
+          description: 'The report is now available to view.',
+        });
       });
     },
     [addReport, updateReport],

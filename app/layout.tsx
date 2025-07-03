@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
 import { Geist } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from '@/contexts/AuthContext';
-import TopBar from '../components/TopBar';
-import ProtectedRoute from '@/contexts/ProtectedRoute';
-import { Analytics } from "@vercel/analytics/react"
+import { AuthProvider } from "@/contexts/AuthContext";
+import TopBar from "../components/TopBar";
+import ProtectedRoute from "@/contexts/ProtectedRoute";
+import { Analytics } from "@vercel/analytics/react";
 // import { PostHogProvider } from '@/contexts/PostHogContext';
 // import { PostHogErrorBoundary } from '@/components/PostHogErrorBoundary';
 
-const geist = Geist({ subsets: ['latin'] });
+const geist = Geist({ subsets: ["latin"] });
 
 export default function RootLayout({
   children,
@@ -22,13 +22,13 @@ export default function RootLayout({
         <Analytics mode="auto" />
         {/* <PostHogErrorBoundary>
           <PostHogProvider> */}
-            <AuthProvider>   
-                <ProtectedRoute>
-                  <TopBar />    
-                  <main>{children}</main>
-                </ProtectedRoute>
-            </AuthProvider>
-          {/* </PostHogProvider>
+        <AuthProvider>
+          <ProtectedRoute>
+            <TopBar />
+            <main>{children}</main>
+          </ProtectedRoute>
+        </AuthProvider>
+        {/* </PostHogProvider>
         </PostHogErrorBoundary> */}
       </body>
     </html>
