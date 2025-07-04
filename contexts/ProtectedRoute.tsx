@@ -1,13 +1,19 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+// import { useRouter, usePathname } from 'next/navigation';
 
-// The PUBLIC_ROUTES are now managed in middleware.ts.
-// This component's primary role is to show a loading state
-// during the initial auth check and prevent rendering children
-// until the check is complete.
+// List of public routes that don't require authentication
+const PUBLIC_ROUTES = [
+  "/", // Add landing page
+  "/login",
+  "/signup",
+  "/verify-email",
+  "/reset-password",
+  "/update-password",
+];
 
 export default function ProtectedRoute({
   children,
@@ -15,16 +21,39 @@ export default function ProtectedRoute({
   children: React.ReactNode;
 }) {
   const { user, isLoading } = useAuth();
+  const router = useRouter();
   const pathname = usePathname();
+  const [hasRedirected, setHasRedirected] = useState(false);
 
-  // The middleware now handles all redirects.
-  // This component will just show a loading state until the user
-  // state is confirmed, preventing a flash of un-styled/incorrect content.
   useEffect(() => {
-    // This effect is useful for debugging auth state changes.
-    // console.log(`Path: ${pathname}, Loading: ${isLoading}, User: ${!!user}`);
-  }, [pathname, isLoading, user]);
+    // Reset redirect flag when pathname changes
+    setHasRedirected(false);
+  }, [pathname]);
 
+  useEffect(() => {
+    // Only run redirect logic once per route and when auth is loaded
+    if (
+      !isLoading &&
+      !user &&
+      !PUBLIC_ROUTES.includes(pathname) &&
+      !hasRedirected
+    ) {
+      setHasRedirected(true);
+
+      // Use Next.js router instead of window.location for better UX
+      const redirectUrl = `/login?redirect=${encodeURIComponent(pathname)}`;
+      router.replace(redirectUrl);
+    }
+  }, [user, isLoading, pathname, router, hasRedirected]);
+
+  useEffect(() => {
+    // Redirect authenticated users from public pages to the library
+    if (user && !isLoading && PUBLIC_ROUTES.includes(pathname)) {
+      router.replace("/library");
+    }
+  }, [user, isLoading, pathname, router]);
+
+  // Show loading state only if actually loading
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col space-y-4 items-center justify-center">
@@ -34,7 +63,18 @@ export default function ProtectedRoute({
     );
   }
 
-  // The middleware ensures that by the time we get here, the user's
-  // access to the route is already validated. So, we can safely render the children.
-  return <>{children}</>;
+  // Only render children if we're on a public route or user is authenticated
+  if (PUBLIC_ROUTES.includes(pathname) || user) {
+    return <>{children}</>;
+  }
+
+  // Show loading while redirect is happening
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mb-4 mx-auto"></div>
+        <div>Redirecting to login...</div>
+      </div>
+    </div>
+  );
 }

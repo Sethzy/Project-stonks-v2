@@ -193,15 +193,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await new Promise((resolve) => setTimeout(resolve, 100));
 
         // Then perform the actual signout
-        const { error } = await supabase.auth.signOut();
+        await supabase.auth.signOut();
 
-        if (error) {
-          console.error("Error signing out:", error);
-          throw error;
-        }
-
-        // The redirect will now be handled by the component that calls signOut.
-        // This makes the auth context more reusable.
+        // Force redirect to login
+        window.location.assign("/login");
       } catch (error) {
         console.error("Error signing out:", error);
       }

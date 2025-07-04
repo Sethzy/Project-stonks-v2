@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LoginForm } from "@/components/LoginForm";
 
 export default function LoginPage() {
-  const { signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
+  const { user, signInWithGoogle, signInWithEmail, signUpWithEmail } =
+    useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState("");
@@ -14,7 +15,18 @@ export default function LoginPage() {
 
   // Get the intended destination from URL params
   const redirectTo = searchParams.get("redirect");
-  const defaultRedirect = "/library";
+  const defaultRedirect = "/dashboard";
+
+  useEffect(() => {
+    if (user) {
+      // Determine where to redirect after login
+      const destination =
+        redirectTo && redirectTo !== "/" ? redirectTo : defaultRedirect;
+      router.replace(destination);
+    } else {
+      setIsLoading(false);
+    }
+  }, [user, router, redirectTo, defaultRedirect]);
 
   const handleSubmit = async (
     email: string,
@@ -38,7 +50,7 @@ export default function LoginPage() {
         await signInWithEmail(email, password);
       }
 
-      // Redirect to intended destination or default
+      // Redirect to intended destination or dashboard
       const destination =
         redirectTo && redirectTo !== "/" ? redirectTo : defaultRedirect;
       router.replace(destination);
