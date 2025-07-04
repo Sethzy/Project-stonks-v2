@@ -8,23 +8,11 @@
  * orchestrates the main user workflow.
  */
 
-import { useEffect, useState } from "react";
 import { useResearchLibrary } from "@/hooks/useResearchLibrary";
 import { useThesisGeneration } from "@/hooks/useThesisGeneration";
 import { AnalysisInput } from "@/components/thesis/AnalysisInput";
 import { ResearchLibrary } from "@/components/thesis/ResearchLibrary";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Toaster } from "sonner";
-
-function LibrarySkeleton() {
-  return (
-    <div className="space-y-4">
-      <Skeleton className="h-24 w-full" />
-      <Skeleton className="h-24 w-full" />
-      <Skeleton className="h-24 w-full" />
-    </div>
-  );
-}
 
 /**
  * The main component for the Research Library page.
@@ -38,11 +26,6 @@ export default function ResearchLibraryPage() {
   const { reports, isLoaded, addReport, updateReport, deleteReport } =
     useResearchLibrary();
   const { startAnalysis } = useThesisGeneration({ addReport, updateReport });
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   return (
     <div className="container mx-auto min-h-screen p-4 py-8 md:p-8">
@@ -80,14 +63,17 @@ export default function ResearchLibraryPage() {
             >
               Reports
             </h2>
-            {!isMounted || !isLoaded ? (
-              <LibrarySkeleton />
-            ) : reports.length === 0 ? (
+            {/* Basic loading and empty state feedback */}
+            {!isLoaded && (
+              <p className="text-muted-foreground">Loading reports...</p>
+            )}
+            {isLoaded && reports.length === 0 && (
               <p className="text-muted-foreground">
                 No reports found. Enter a ticker above to begin your first
                 analysis.
               </p>
-            ) : (
+            )}
+            {isLoaded && reports.length > 0 && (
               <ResearchLibrary reports={reports} onDelete={deleteReport} />
             )}
           </div>

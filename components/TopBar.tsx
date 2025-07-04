@@ -4,7 +4,6 @@ import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Skeleton } from "@/components/ui/skeleton";
 
 // TopBar component handles user profile display and navigation
 export default function TopBar() {
@@ -15,11 +14,6 @@ export default function TopBar() {
 
   // State for tracking logout process
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   // Handle click outside dropdown to close it
   useEffect(() => {
@@ -51,26 +45,6 @@ export default function TopBar() {
       setIsLoggingOut(false);
     }
   };
-
-  if (!isMounted) {
-    return (
-      <div className="w-full bg-surface-light dark:bg-surface-dark border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-3">
-          <Link
-            href="/"
-            className="text-md sm:text-lg font-medium text-text dark:text-text-dark flex items-center gap-2"
-          >
-            <span className="text-2xl">📈</span>
-            <span className="font-sans">ThesisBuilder</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Skeleton className="h-9 w-24 rounded-full" />
-            <Skeleton className="h-10 w-10 rounded-full" />
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full bg-surface-light dark:bg-surface-dark border-b border-gray-200 dark:border-gray-700">
